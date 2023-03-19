@@ -2,8 +2,11 @@ Email Analysis and Generator
 This project provides tools for generating random emails and analyzing mbox files with a GUI interface. It consists of three Python scripts:
 
 emailgenerator.py: A script for generating random emails and saving them to an mbox file.
+
 dataprocessing.py: A script for processing and analyzing mbox files, including extracting sender and recipient information, counting the number of emails sent and received, and finding the most common words in the email subject and body.
+
 guiemail.py: A graphical user interface (GUI) for loading mbox files, running the analysis from dataprocessing.py, and displaying the results.
+
 Requirements
 Python 3.6+
 
