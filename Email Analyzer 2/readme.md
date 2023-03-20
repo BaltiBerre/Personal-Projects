@@ -21,7 +21,10 @@ To generate random emails and save them to an mbox file, use the emailgenerator.
 bash
 Copy code
 python emailgenerator.py 100 10 "example.mbox" --email_categories "Work,Personal" --email_templates "template1.html,template2.html"
-This command generates 100 random emails with 10 people to consider and saves them to the example.mbox file. The emails will have categories of "Work" and "Personal" and will use the specified HTML email templates.
+
+This command generates 100 random emails with 10 people to consider and saves them to the example.mbox file. 
+
+The emails will have categories of "Work" and "Personal" and will use the specified HTML email templates.
 
 Analyzing Emails with the GUI
 To analyze mbox files using the GUI, run the guiemail.py script:
