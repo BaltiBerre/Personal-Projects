@@ -1,4 +1,5 @@
 # train.py
+from torch.optim.lr_scheduler import StepLR
 from data_preprocessing import prepare_data, get_data_loaders
 from model import SimpleCNN
 import torch
@@ -20,7 +21,10 @@ def train_model(dataset_path, batch_size=32, epochs=10000, checkpoint_interval=1
     # Initialize model, criterion, and optimizer
     model = SimpleCNN(num_classes=num_classes)
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=0.001)
+    optimizer = optim.Adam(model.parameters(), lr=0.001)  # Initial learning rate
+
+    # Initialize the learning rate scheduler
+    scheduler = StepLR(optimizer, step_size=30, gamma=0.1)  # Adjust the learning rate
 
     # Load checkpoint if exists
     checkpoint_path = 'model_checkpoint.pth'
@@ -28,6 +32,7 @@ def train_model(dataset_path, batch_size=32, epochs=10000, checkpoint_interval=1
         checkpoint = torch.load(checkpoint_path)
         model.load_state_dict(checkpoint['model_state'])
         optimizer.load_state_dict(checkpoint['optimizer_state'])
+        scheduler.load_state_dict(checkpoint['scheduler_state'])  # Load scheduler state
         start_epoch = checkpoint['epoch']
         print(f"Resuming training from epoch {start_epoch + 1}")
     else:
@@ -43,6 +48,9 @@ def train_model(dataset_path, batch_size=32, epochs=10000, checkpoint_interval=1
             loss.backward()
             optimizer.step()
         
+        # After optimizer.step(), update the learning rate
+        scheduler.step()
+        
         # Evaluation on the test set
         model.eval()
         correct = 0
@@ -53,18 +61,18 @@ def train_model(dataset_path, batch_size=32, epochs=10000, checkpoint_interval=1
                 _, predicted = torch.max(outputs.data, 1)
                 total += labels.size(0)
                 correct += (predicted == labels).sum().item()
-
+        
         accuracy = correct / total
         print(f"Epoch {epoch+1}, Loss: {loss.item()}, Accuracy on test set: {accuracy:.2f}")
-
-        # Save checkpoint periodically
+        
+        # Save checkpoint at the end of each epoch or checkpoint interval
         if (epoch + 1) % checkpoint_interval == 0 or (epoch + 1) == epochs:
-            save_checkpoint = {
-                'epoch': epoch,
+            torch.save({
+                'epoch': epoch + 1,  # Save next epoch index to continue correctly
                 'model_state': model.state_dict(),
                 'optimizer_state': optimizer.state_dict(),
-            }
-            torch.save(save_checkpoint, checkpoint_path)
+                'scheduler_state': scheduler.state_dict(),  # Save scheduler state
+            }, checkpoint_path)
             print(f"Checkpoint saved at epoch {epoch + 1}")
 
     # Optionally, save the final model state separately
